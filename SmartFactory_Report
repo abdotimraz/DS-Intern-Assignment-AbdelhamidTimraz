@@ -1,0 +1,104 @@
+
+# Smart Factory Energy Prediction Challenge
+
+**Prepared by:** Abdelhamid Timraz
+
+---
+
+## Problem Statement
+
+SmartManufacture Inc. aims to reduce energy consumption by predicting the energy usage of factory equipment based on environmental sensor data and external conditions. The goal of this project is to develop a regression model that accurately predicts `equipment_energy_consumption` using available sensor, weather, and time-based features.
+
+---
+
+## Dataset Description
+
+The dataset includes:
+
+- **Time features**: timestamp (processed into hour, weekday, month)
+- **Zone data**: 9 zones in the factory, each with temperature and humidity sensors
+- **Lighting energy usage**
+- **Outdoor weather features**: temperature, humidity, wind, pressure, dew point
+- **Two random variables** (intended to test feature selection)
+
+---
+
+## Data Cleaning & Preprocessing
+
+- Converted incorrectly-typed columns (object → float) using `pd.to_numeric`.
+- Handled missing values:
+  - Dropped rows with missing `equipment_energy_consumption`
+  - Filled other missing values using **median imputation**
+- Extracted time-based features:
+  - `hour`, `weekday`, and `month` from the `timestamp`
+- Dropped unused or irrelevant features:
+  - `timestamp` (after extracting time info)
+  - `random_variable1` and `random_variable2` (correlation near 0)
+
+---
+
+## Feature Engineering
+
+- Created `avg_zone_temperature` and `avg_zone_humidity` across all 9 zones.
+- Verified skewness and confirmed the use of **median** for imputation due to right-skewed energy usage data.
+- Selected final features excluding the timestamp and random variables.
+
+---
+
+## Exploratory Data Analysis
+
+- **Energy consumption** is right-skewed with values between ~10–1080 Wh.
+- **Zone temperature and humidity** showed weak individual correlation with the target.
+- **Time features** (`hour`, `weekday`) revealed daily and weekly patterns.
+- **Weather features** like `outdoor_temperature` and `dew_point` showed mild influence.
+
+---
+
+## Modeling Approach
+
+### Model 1: Baseline Linear Regression
+-  MAE: 71.85 Wh
+-  RMSE: 162.05 Wh
+-  R²: 0.0218
+- *Conclusion: Very weak model performance, likely due to non-linearity in data.*
+
+### Model 2: Random Forest Regressor (Default)
+-  MAE: 67.55 Wh
+-  RMSE: 159.45 Wh
+-  R²: 0.0529
+- *Conclusion: Better than linear model, but still underfitting.*
+
+### Model 3: Random Forest (Tuned with GridSearchCV)
+-  Best Parameters: `{'max_depth': None, 'max_features': 'sqrt', 'min_samples_leaf': 4, 'n_estimators': 100}`
+-  MAE: **60.97 Wh**
+-  RMSE: **153.74 Wh**
+-  R²: **0.1195**
+- *Conclusion: Best performing model so far, but still explains only 12% of the variance.*
+
+---
+
+##  Model Evaluation Summary
+
+| Model               | MAE (Wh) | RMSE (Wh) | R² Score |
+|--------------------|----------|-----------|----------|
+| Linear Regression  | 71.85    | 162.05    | 0.0218   |
+| Random Forest       | 67.55    | 159.45    | 0.0529   |
+| Tuned Random Forest | 60.97    | 153.74    | 0.1195   |
+
+---
+
+##  Key Insights
+
+- The data shows weak linear relationships — tree-based models perform better.
+- Time-of-day (`hour`) and day-of-week (`weekday`) are helpful predictors.
+- Random variables were found to be **irrelevant**..
+
+---
+
+
+
+---
+
+
+---
+
